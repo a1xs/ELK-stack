@@ -29,6 +29,7 @@ spec:
                 port:
                   number: 5601
 ---
+#### https://www.elastic.co/guide/en/cloud-on-k8s/master/k8s-volume-claim-templates.html
 apiVersion: elasticsearch.k8s.elastic.co/v1
 kind: Elasticsearch
 metadata:
@@ -43,7 +44,18 @@ spec:
       config:
         # This setting has performance implications. See the README for more details.
         node.store.allow_mmap: false
+#      volumeClaimTemplates:
+#        - metadata:
+#            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+#          spec:
+#            accessModes:
+#              - ReadWriteOnce
+#            resources:
+#              requests:
+#                storage: 5Gi
+#            storageClassName: standard
 ---
+#### https://www.elastic.co/guide/en/cloud-on-k8s/master/k8s-kibana-advanced-configuration.html
 apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana
 metadata:
@@ -75,6 +87,7 @@ spec:
   config:
     server.publicBaseUrl: http://kibana.DOMAIN.dmz
 ---
+#### https://www.elastic.co/guide/en/cloud-on-k8s/master/k8s-logstash-configuration.html#k8s-logstash-configuring-logstash
 apiVersion: logstash.k8s.elastic.co/v1alpha1
 kind: Logstash
 metadata:
@@ -146,6 +159,16 @@ spec:
       count: 1
       config:
         node.store.allow_mmap: false
+#      volumeClaimTemplates:
+#        - metadata:
+#            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+#          spec:
+#            accessModes:
+#              - ReadWriteOnce
+#            resources:
+#              requests:
+#                storage: 5Gi
+#            storageClassName: standard
 ---
 apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana
