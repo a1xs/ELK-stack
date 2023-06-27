@@ -38,22 +38,34 @@ metadata:
 spec:
   version: 8.7.0
 #  image: "YOUR_REGISTRY/elasticsearch:8.7.0"
-  nodeSets:
+    nodeSets:
     - name: default
       count: 1
       config:
-        # This setting has performance implications. See the README for more details.
         node.store.allow_mmap: false
-#      volumeClaimTemplates:
-#        - metadata:
-#            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
-#          spec:
-#            accessModes:
-#              - ReadWriteOnce
-#            resources:
-#              requests:
-#                storage: 5Gi
-#            storageClassName: standard
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms2g -Xmx2g
+              resources:
+                requests:
+                  memory: 2Gi
+                  cpu: 2
+                limits:
+                  memory: 4Gi
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 5Gi
+#            storageClassName: nfs-client
 ---
 #### https://www.elastic.co/guide/en/cloud-on-k8s/master/k8s-kibana-advanced-configuration.html
 apiVersion: kibana.k8s.elastic.co/v1
@@ -65,23 +77,20 @@ spec:
   version: 8.7.0
 #  image: "YOUR_REGISTRY/kibana:8.7.0"
   count: 1
-#  count: 3
-#  podTemplate:
-#    spec:
-#      containers:
-#        - name: kibana
-#          env:
-#            - name: NODE_OPTIONS
-#              value: "--max-old-space-size=2048"
-#          resources:
-#            requests:
-#              memory: 1Gi
-#              cpu: 0.5
-#            limits:
-#              memory: 2.5Gi
-#              cpu: 2
-#      nodeSelector:
-#        type: frontend
+  podTemplate:
+    spec:
+      containers:
+        - name: kibana
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1024"
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 0.5
+            limits:
+              memory: 2Gi
+              cpu: 1
   elasticsearchRef:
     name: elasticsearch
   config:
@@ -97,21 +106,32 @@ spec:
   count: 1
   version: 8.7.0
 #  image: "YOUR_REGISTRY/logstash:8.7.0"
-  podTemplate:
+    podTemplate:
     spec:
       containers:
-        - name: metricbeat
-#          image: "YOUR_REGISTRY/metricbeat:8.7.0"
+        - name: logstash
           env:
             - name: LS_JAVA_OPTS
               value: "-Xmx2g -Xms2g"
           resources:
             requests:
+              memory: 2Gi
+              cpu: 1
+            limits:
+              memory: 2Gi
+              cpu: 1
+        - name: metricbeat
+          image: "YOUR_REGISTRY/metricbeat:8.7.0"
+          env:
+            - name: LS_JAVA_OPTS
+              value: "-Xmx1g -Xms1g"
+          resources:
+            requests:
               memory: 1Gi
               cpu: 0.5
             limits:
-              memory: 4Gi
-              cpu: 2
+              memory: 1Gi
+              cpu: 0.5
   elasticsearchRefs:
     - clusterName: eck
       name: elasticsearch
@@ -154,21 +174,34 @@ metadata:
 spec:
   version: 8.7.0
 #  image: "YOUR_REGISTRY/elasticsearch:8.7.0"
-  nodeSets:
+    nodeSets:
     - name: default
       count: 1
       config:
         node.store.allow_mmap: false
-#      volumeClaimTemplates:
-#        - metadata:
-#            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
-#          spec:
-#            accessModes:
-#              - ReadWriteOnce
-#            resources:
-#              requests:
-#                storage: 5Gi
-#            storageClassName: standard
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms2g -Xmx2g
+              resources:
+                requests:
+                  memory: 2Gi
+                  cpu: 2
+                limits:
+                  memory: 4Gi
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 5Gi
+#            storageClassName: nfs-client
 ---
 apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana
@@ -179,5 +212,20 @@ spec:
   version: 8.7.0
 #  image: "YOUR_REGISTRY/kibana:8.7.0"
   count: 1
+    podTemplate:
+    spec:
+      containers:
+        - name: kibana
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1024"
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 0.5
+            limits:
+              memory: 1.5Gi
+              cpu: 1
   elasticsearchRef:
     name: elasticsearch-monitoring
+
